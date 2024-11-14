@@ -15,67 +15,70 @@ import { map, switchMap } from "rxjs/operators";
   styleUrls: ["./landing-page.component.scss"],
 })
 export class LandingPageComponent implements OnInit {
-  public workflowCount: number = 0;
-  public topLovedWorkflows: DashboardEntry[] = [];
-  public topClonedWorkflows: DashboardEntry[] = [];
+  public databaseCount: number = 0;
+  public topLovedDatabases: DashboardEntry[] = [];
+  public topClonedDatabases: DashboardEntry[] = [];
 
   constructor(
-    private hubWorkflowService: HubWorkflowService,
+    private hubDatabaseService: HubWorkflowService,
     private router: Router,
     private searchService: SearchService
   ) {}
 
   ngOnInit(): void {
-    this.getWorkflowCount();
-    this.fetchTopWorkflows(
-      this.hubWorkflowService.getTopLovedWorkflows(),
-      workflows => (this.topLovedWorkflows = workflows),
-      "Top Loved Workflows"
+    this.getDatabaseCount();
+    this.fetchTopDatabases(
+      // TODO: getTopLovedWorkflows should eventually be replaced with getTopLovedWDatabases
+      this.hubDatabaseService.getTopLovedWorkflows(),
+      databases => (this.topLovedDatabases = databases),
+      "Top Loved Databases"
     );
-    this.fetchTopWorkflows(
-      this.hubWorkflowService.getTopClonedWorkflows(),
-      workflows => (this.topClonedWorkflows = workflows),
-      "Top Cloned Workflows"
+    this.fetchTopDatabases(
+      // TODO: getTopClonedWorkflows should eventually be replaced with topClonedWDatabases
+      this.hubDatabaseService.getTopClonedWorkflows(),
+      databases => (this.topClonedDatabases = databases),
+      "Top Cloned Databases"
     );
   }
 
-  getWorkflowCount(): void {
-    this.hubWorkflowService
+  getDatabaseCount(): void {
+    this.hubDatabaseService
+      // TODO: getTopClonedWorkflows should eventually be replaced with topClonedWDatabases
       .getWorkflowCount()
       .pipe(untilDestroyed(this))
       .subscribe((count: number) => {
-        this.workflowCount = count;
+        this.databaseCount = count;
       });
   }
 
   /**
-   * Helper function to fetch top workflows and associate user info with them.
-   * @param workflowsObservable Observable that returns workflows (Top Loved or Top Cloned)
-   * @param updateWorkflowsFn Function to update the component's workflow state
-   * @param workflowType Label for logging
+   * Helper function to fetch top databases and associate user info with them.
+   * @param databasesObservable Observable that returns databases (Top Loved or Top Cloned)
+   * @param updateDatabasesFn Function to update the component's database state
+   * @param databaseType Label for logging
    */
-  fetchTopWorkflows(
-    workflowsObservable: Observable<DashboardWorkflow[]>,
-    updateWorkflowsFn: (entries: DashboardEntry[]) => void,
-    workflowType: string
+  fetchTopDatabases(
+    databasesObservable: Observable<DashboardWorkflow[]>,
+    updateDatabasesFn: (entries: DashboardEntry[]) => void,
+    databaseType: string
   ): void {
-    workflowsObservable
+    databasesObservable
       .pipe(
         // eslint-disable-next-line rxjs/no-unsafe-takeuntil
         untilDestroyed(this),
-        map((workflows: DashboardWorkflow[]) => {
+        map((databases: DashboardWorkflow[]) => {
           const userIds = new Set<number>();
-          workflows.forEach(workflow => {
-            userIds.add(workflow.ownerId);
+          databases.forEach(database => {
+            userIds.add(database.ownerId);
           });
-          return { workflows, userIds: Array.from(userIds) };
+          return { databases, userIds: Array.from(userIds) };
         }),
-        switchMap(({ workflows, userIds }) =>
+        switchMap(({ databases, userIds }) =>
           this.searchService.getUserInfo(userIds).pipe(
             map((userIdToInfoMap: { [key: number]: UserInfo }) => {
-              const dashboardEntries = workflows.map(workflow => {
-                const userInfo = userIdToInfoMap[workflow.ownerId];
-                const entry = new DashboardEntry(workflow);
+              const dashboardEntries = databases.map(database => {
+                const userInfo = userIdToInfoMap[database.ownerId];
+                const entry = new DashboardEntry(database);
                 if (userInfo) {
                   entry.setOwnerName(userInfo.userName);
                   entry.setOwnerGoogleAvatar(userInfo.googleAvatar ?? "");
@@ -88,11 +91,11 @@ export class LandingPageComponent implements OnInit {
         )
       )
       .subscribe((dashboardEntries: DashboardEntry[]) => {
-        updateWorkflowsFn(dashboardEntries);
+        updateDatabasesFn(dashboardEntries);
       });
   }
 
   navigateToSearch(): void {
-    this.router.navigate(["/dashboard/hub/workflow/result"]);
+    this.router.navigate(["/dashboard/hub/database/result"]);
   }
 }
