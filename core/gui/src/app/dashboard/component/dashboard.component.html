@@ -15,8 +15,8 @@
         <img
           *ngIf="!isCollpased"
           alt="logo"
-          height="50"
-          src="../../../../assets/logos/logo.png" />
+          height="55"
+          src="../../../../assets/logos/uci-cncm-logo.jpg" />
       </li>
 
       <li
@@ -34,30 +34,6 @@
         nzIcon="user"
         nzOpen="true">
         <ul>
-          <li
-            nz-menu-item
-            nz-tooltip="Look up the user projects"
-            nzMatchRouter="true"
-            nzTooltipPlacement="right"
-            [routerLink]="DASHBOARD_USER_PROJECT">
-            <span
-              nz-icon
-              nzType="container"></span>
-            <span>Projects</span>
-          </li>
-
-          <li
-            nz-menu-item
-            nz-tooltip="Open the saved workflows"
-            nzMatchRouter="true"
-            nzTooltipPlacement="right"
-            [routerLink]="DASHBOARD_USER_WORKFLOW">
-            <span
-              nz-icon
-              nzType="project"></span>
-            <span>Workflows</span>
-          </li>
-
           <li
             nz-menu-item
             nz-tooltip="Look up for datasets"
