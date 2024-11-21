@@ -46,6 +46,23 @@
           style="width: 160px">
           Restore this version
         </button>
+        <button
+          *ngIf="displayParticularWorkflowVersion"
+          nz-button
+          nzType="default"
+          (click)="cloneVersion()"
+          style="width: 160px; margin-left: 10px">
+          Clone this version
+        </button>
+        <span
+          *ngIf="displayParticularWorkflowVersion && workflowVersionService.selectedDisplayedVersionId.getValue() !== null"
+          title="Current Version"
+          style="margin-left: 10px">
+          <i
+            nz-icon
+            nzType="info-circle"></i>
+          Current Version: {{ workflowVersionService.selectedDisplayedVersionId.getValue() }}
+        </span>
         <span *ngIf="!displayParticularWorkflowVersion"> {{autoSaveState}} </span>
       </div>
 
@@ -59,7 +76,7 @@
       <nz-button-group
         id="user-buttons"
         *ngIf="!displayParticularWorkflowVersion">
-        <a [routerLink]="'/dashboard/user/workflow'">
+        <a [routerLink]="DASHBOARD_USER_WORKFLOW">
           <button
             *ngIf="userSystemEnabled"
             nz-button
@@ -121,6 +138,22 @@
       </nz-button-group>
       <ng-template #utilities>
         <nz-button-group>
+          <button
+            (click)="onClickClosePanels()"
+            nz-button
+            title="close panels">
+            <i
+              nz-icon
+              nzType="minus"></i>
+          </button>
+          <button
+            (click)="onClickResetPanels()"
+            nz-button
+            title="reset panels">
+            <i
+              nz-icon
+              nzType="clear"></i>
+          </button>
           <button
             (click)="onClickGenerateReport()"
             nz-button

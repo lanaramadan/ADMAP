@@ -39,7 +39,7 @@
             nz-tooltip="Look up for datasets"
             nzMatchRouter="true"
             nzTooltipPlacement="right"
-            routerLink="/dashboard/user/dataset">
+            [routerLink]="DASHBOARD_USER_DATASET">
             <span
               nz-icon
               nzType="database"></span>
@@ -50,7 +50,7 @@
             nz-tooltip="Quota information"
             nzMatchRouter="true"
             nzTooltipPlacement="right"
-            routerLink="/dashboard/user/quota">
+            [routerLink]="DASHBOARD_USER_QUOTA">
             <span
               nz-icon
               nzType="dashboard"></span>
@@ -62,7 +62,7 @@
             nz-tooltip="Open the discussion forum"
             nzMatchRouter="true"
             nzTooltipPlacement="right"
-            routerLink="/dashboard/user/discussion">
+            [routerLink]="DASHBOARD_USER_DISCUSSION">
             <span
               nz-icon
               nzType="comment"></span>
@@ -79,7 +79,7 @@
                 nz-tooltip="Look up the users"
                 nzMatchRouter="true"
                 nzTooltipPlacement="right"
-                routerLink="/dashboard/admin/user">
+                [routerLink]="DASHBOARD_ADMIN_USER">
                 <span
                   nz-icon
                   nzType="user"></span>
@@ -90,7 +90,7 @@
                 nz-tooltip="View statistics"
                 nzMatchRouter="true"
                 nzTooltipPlacement="right"
-                routerLink="/dashboard/admin/execution">
+                [routerLink]="DASHBOARD_ADMIN_EXECUTION">
                 <span
                   nz-icon
                   nzType="setting"></span>
@@ -101,7 +101,7 @@
                 nz-tooltip="Setup gmail"
                 nzMatchRouter="true"
                 nzTooltipPlacement="right"
-                routerLink="/dashboard/admin/gmail">
+                [routerLink]="DASHBOARD_ADMIN_GMAIL">
                 <span
                   nz-icon
                   nzType="mail"></span>
