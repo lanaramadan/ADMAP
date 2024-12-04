@@ -30,7 +30,7 @@
       <li
         *ngIf="isLogin"
         nz-submenu
-        nzTitle="Your Work"
+        nzTitle="Your Data"
         nzIcon="user"
         nzOpen="true">
         <ul>
@@ -84,17 +84,6 @@
                   nz-icon
                   nzType="user"></span>
                 <span>Users</span>
-              </li>
-              <li
-                nz-menu-item
-                nz-tooltip="View statistics"
-                nzMatchRouter="true"
-                nzTooltipPlacement="right"
-                [routerLink]="DASHBOARD_ADMIN_EXECUTION">
-                <span
-                  nz-icon
-                  nzType="setting"></span>
-                <span>Executions</span>
               </li>
               <li
                 nz-menu-item
