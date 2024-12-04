@@ -1,0 +1,21 @@
+<div class="contributors-form">
+  <form [formGroup]="contributorsForm">
+    <div formArrayName="contributors">
+      <div *ngFor="let contributor of contributors?.controls; let i = index">
+        <div [formGroupName]="i" class="contributor-group">
+          <label for="name">Name:</label>
+          <input id="name" formControlName="name" placeholder="Contributor's Name">
+
+          <label for="role">Role:</label>
+          <select id="role" formControlName="role" placeholder="Name">
+            <option *ngFor="let role of contributorRoles" [value]="role">{{ role }}</option>
+          </select>
+
+          <button type="button" (click)="removeContributor(i)"  class="remove-btn">Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" (click)="addContributor()" class="add-btn">Add Contributor</button>
+  </form>
+</div>

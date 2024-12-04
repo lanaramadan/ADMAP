@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import { FormlyFieldConfig } from "@ngx-formly/core";
 import { DatasetService } from "../../../../../service/user/dataset/dataset.service";
 import { FileUploadItem } from "../../../../../type/dashboard-file.interface";
@@ -74,7 +74,7 @@ export class UserDatasetVersionCreatorComponent implements OnInit {
             key: "name",
             type: "input",
             templateOptions: {
-              label: "Name",
+              label: "Dataset Name",
               required: true,
             },
           },
