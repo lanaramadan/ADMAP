@@ -260,24 +260,59 @@ object DatasetResource {
   }
 
   // create a new dataset version using the form data from frontend
+//  def createNewDatasetVersionFromFormData(
+//      ctx: DSLContext,
+//      did: UInteger,
+//      uid: UInteger,
+//      ownerEmail: String,
+//      userProvidedVersionName: String,
+//      multiPart: FormDataMultiPart
+//  ): Option[DashboardDatasetVersion] = {
+//    val datasetOperation = parseUserUploadedFormToDatasetOperations(did, multiPart)
+//    applyDatasetOperationToCreateNewVersion(
+//      ctx,
+//      did,
+//      uid,
+//      ownerEmail,
+//      userProvidedVersionName,
+//      datasetOperation
+//    )
+//  }
+
   def createNewDatasetVersionFromFormData(
-      ctx: DSLContext,
-      did: UInteger,
-      uid: UInteger,
-      ownerEmail: String,
-      userProvidedVersionName: String,
-      multiPart: FormDataMultiPart
-  ): Option[DashboardDatasetVersion] = {
+         ctx: DSLContext,
+         did: UInteger,
+         uid: UInteger,
+         ownerEmail: String,
+         userProvidedVersionName: String,
+         multiPart: FormDataMultiPart
+       ): Option[DashboardDatasetVersion] = {
     val datasetOperation = parseUserUploadedFormToDatasetOperations(did, multiPart)
-    applyDatasetOperationToCreateNewVersion(
-      ctx,
-      did,
-      uid,
-      ownerEmail,
-      userProvidedVersionName,
-      datasetOperation
-    )
+
+    // if no files were provided (both to add and to remove), we can still create a version without file changes
+    if (datasetOperation.filesToAdd.isEmpty && datasetOperation.filesToRemove.isEmpty) {
+      val versionName = generateDatasetVersionName(ctx, did, userProvidedVersionName)
+      return applyDatasetOperationToCreateNewVersion(
+        ctx,
+        did,
+        uid,
+        ownerEmail,
+        versionName,
+        DatasetOperation(Map(), List()) // no files to add or remove
+      )
+    } else {
+      // if files are provided, proceed as usual
+      return applyDatasetOperationToCreateNewVersion(
+        ctx,
+        did,
+        uid,
+        ownerEmail,
+        userProvidedVersionName,
+        datasetOperation
+      )
+    }
   }
+
 
   // Private method to get user datasets
   private def getUserDatasets(ctx: DSLContext, uid: UInteger): List[Dataset] = {
@@ -536,12 +571,12 @@ class DatasetResource {
       val createdVersion =
         createNewDatasetVersionFromFormData(ctx, did, uid, user.getEmail, initialVersionName, files)
 
-      createdVersion match {
-        case Some(_) =>
-        case None    =>
-          // none means creation failed, user does not submit any files when creating the dataset
-          throw new BadRequestException(ERR_DATASET_CREATION_FAILED_MESSAGE)
-      }
+//      createdVersion match {
+//        case Some(_) =>
+//        case None    =>
+//          // none means creation failed, user does not submit any files when creating the dataset
+//          throw new BadRequestException(ERR_DATASET_CREATION_FAILED_MESSAGE)
+//      }
 
       DashboardDataset(
         new Dataset(
@@ -560,6 +595,65 @@ class DatasetResource {
       )
     }
   }
+
+
+//  @POST
+//  @Path("/{did}/add-file")
+//  def addFileToDataset(
+//        @PathParam("did") did: UInteger,
+//        @Auth user: User,
+//        multiPart: FormDataMultiPart
+//      ): Response = {
+//    try {
+//      // Parse the uploaded form data to extract the files to add
+//      val datasetOperation = DatasetResource.parseUserUploadedFormToDatasetOperations(did, multiPart)
+//
+//      // Ensure files to add are present
+//      if (datasetOperation.filesToAdd.isEmpty) {
+//        return Response
+//          .status(Response.Status.BAD_REQUEST)
+//          .entity(Map("error" -> "No files provided for upload"))
+//          .build()
+//      }
+//
+//      // Create a new dataset version by adding the files
+//      val newVersion = DatasetResource.createNewDatasetVersionByAddingFiles(
+//        did,
+//        user,
+//        datasetOperation.filesToAdd
+//      )
+//
+//      // Handle the case where the version could not be created
+//      newVersion match {
+//        case Some(version) =>
+//          Response
+//            .ok()
+//            .entity(Map("message" -> "File(s) added successfully", "version" -> version))
+//            .build()
+//        case None =>
+//          Response
+//            .status(Response.Status.INTERNAL_SERVER_ERROR)
+//            .entity(Map("error" -> "Failed to create a new dataset version"))
+//            .build()
+//      }
+//    } catch {
+//      case e: NotFoundException =>
+//        Response
+//          .status(Response.Status.NOT_FOUND)
+//          .entity(Map("error" -> e.getMessage))
+//          .build()
+//      case e: ForbiddenException =>
+//        Response
+//          .status(Response.Status.FORBIDDEN)
+//          .entity(Map("error" -> e.getMessage))
+//          .build()
+//      case e: Exception =>
+//        Response
+//          .status(Response.Status.INTERNAL_SERVER_ERROR)
+//          .entity(Map("error" -> e.getMessage))
+//          .build()
+//    }
+//  }
 
   @POST
   @Path("/delete")
