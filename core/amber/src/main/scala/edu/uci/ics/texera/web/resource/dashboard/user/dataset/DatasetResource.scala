@@ -2,10 +2,7 @@ package edu.uci.ics.texera.web.resource.dashboard.user.dataset
 
 import edu.uci.ics.amber.core.storage.{FileResolver, StorageConfig}
 import edu.uci.ics.amber.core.storage.model.DatasetFileDocument
-import edu.uci.ics.amber.core.storage.util.dataset.{
-  GitVersionControlLocalFileStorage,
-  PhysicalFileNode
-}
+import edu.uci.ics.amber.core.storage.util.dataset.{GitVersionControlLocalFileStorage, PhysicalFileNode}
 import edu.uci.ics.amber.engine.common.Utils.withTransaction
 import edu.uci.ics.amber.util.PathUtils
 import edu.uci.ics.texera.dao.SqlServer
@@ -15,17 +12,8 @@ import edu.uci.ics.texera.web.model.jooq.generated.tables.Dataset.DATASET
 import edu.uci.ics.texera.web.model.jooq.generated.tables.DatasetUserAccess.DATASET_USER_ACCESS
 import edu.uci.ics.texera.web.model.jooq.generated.tables.DatasetVersion.DATASET_VERSION
 import edu.uci.ics.texera.web.model.jooq.generated.tables.User.USER
-import edu.uci.ics.texera.web.model.jooq.generated.tables.daos.{
-  DatasetDao,
-  DatasetUserAccessDao,
-  DatasetVersionDao
-}
-import edu.uci.ics.texera.web.model.jooq.generated.tables.pojos.{
-  Dataset,
-  DatasetUserAccess,
-  DatasetVersion,
-  User
-}
+import edu.uci.ics.texera.web.model.jooq.generated.tables.daos.{DatasetDao, DatasetUserAccessDao, DatasetVersionDao}
+import edu.uci.ics.texera.web.model.jooq.generated.tables.pojos.{Dataset, DatasetUserAccess, DatasetVersion, User}
 import edu.uci.ics.texera.web.resource.dashboard.user.dataset.DatasetAccessResource._
 import edu.uci.ics.texera.web.resource.dashboard.user.dataset.DatasetResource.{context, _}
 import edu.uci.ics.texera.web.resource.dashboard.user.dataset.`type`.DatasetFileNode
@@ -36,7 +24,9 @@ import org.jooq.types.UInteger
 import org.jooq.{DSLContext, EnumType}
 import play.api.libs.json.Json
 
-import java.io.{IOException, InputStream, OutputStream}
+import java.nio.file.Paths
+import java.nio.file.Files
+import java.io.{File, IOException, InputStream, OutputStream}
 import java.net.{URI, URLDecoder}
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -460,6 +450,8 @@ object DatasetResource {
   case class DatasetIDs(dids: List[UInteger])
 
   case class DatasetNameModification(did: UInteger, name: String)
+  case class CreateDirectoryRequest(username: UInteger, did: UInteger)
+
 
   case class DatasetDescriptionModification(did: UInteger, description: String)
 
@@ -520,6 +512,28 @@ object DatasetResource {
 @RolesAllowed(Array("REGULAR", "ADMIN"))
 @Path("/dataset")
 class DatasetResource {
+
+  @POST
+  @Path("/create-directory")
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  def createDirectory(
+           @Auth user: SessionUser,
+           createDirectoryRequest: CreateDirectoryRequest
+         ): Response = {
+    val did = createDirectoryRequest.did
+    val username = createDirectoryRequest.username
+
+    withTransaction(context) { ctx =>
+      val uid = user.getUid
+
+      // Construct the directory path in the required format /username/did
+      val directoryPath = Paths.get(s"./$username/$did")
+      Files.createDirectories(directoryPath)
+
+      Response.ok().entity(s"Directory '/$username/$did' created successfully.").build()
+    }
+  }
+
 
   @POST
   @Path("/create")
@@ -595,65 +609,6 @@ class DatasetResource {
       )
     }
   }
-
-
-//  @POST
-//  @Path("/{did}/add-file")
-//  def addFileToDataset(
-//        @PathParam("did") did: UInteger,
-//        @Auth user: User,
-//        multiPart: FormDataMultiPart
-//      ): Response = {
-//    try {
-//      // Parse the uploaded form data to extract the files to add
-//      val datasetOperation = DatasetResource.parseUserUploadedFormToDatasetOperations(did, multiPart)
-//
-//      // Ensure files to add are present
-//      if (datasetOperation.filesToAdd.isEmpty) {
-//        return Response
-//          .status(Response.Status.BAD_REQUEST)
-//          .entity(Map("error" -> "No files provided for upload"))
-//          .build()
-//      }
-//
-//      // Create a new dataset version by adding the files
-//      val newVersion = DatasetResource.createNewDatasetVersionByAddingFiles(
-//        did,
-//        user,
-//        datasetOperation.filesToAdd
-//      )
-//
-//      // Handle the case where the version could not be created
-//      newVersion match {
-//        case Some(version) =>
-//          Response
-//            .ok()
-//            .entity(Map("message" -> "File(s) added successfully", "version" -> version))
-//            .build()
-//        case None =>
-//          Response
-//            .status(Response.Status.INTERNAL_SERVER_ERROR)
-//            .entity(Map("error" -> "Failed to create a new dataset version"))
-//            .build()
-//      }
-//    } catch {
-//      case e: NotFoundException =>
-//        Response
-//          .status(Response.Status.NOT_FOUND)
-//          .entity(Map("error" -> e.getMessage))
-//          .build()
-//      case e: ForbiddenException =>
-//        Response
-//          .status(Response.Status.FORBIDDEN)
-//          .entity(Map("error" -> e.getMessage))
-//          .build()
-//      case e: Exception =>
-//        Response
-//          .status(Response.Status.INTERNAL_SERVER_ERROR)
-//          .entity(Map("error" -> e.getMessage))
-//          .build()
-//    }
-//  }
 
   @POST
   @Path("/delete")
