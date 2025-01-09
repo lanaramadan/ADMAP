@@ -2,7 +2,6 @@ package edu.uci.ics.amber.engine.architecture.controller
 
 import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{AllForOneStrategy, Props, SupervisorStrategy}
-import edu.uci.ics.amber.core.storage.result.OpResultStorage
 import edu.uci.ics.amber.core.workflow.{PhysicalPlan, WorkflowContext}
 import edu.uci.ics.amber.engine.architecture.common.{ExecutorDeployment, WorkflowActor}
 import edu.uci.ics.amber.engine.architecture.common.WorkflowActor.NetworkAck
@@ -19,7 +18,7 @@ import edu.uci.ics.amber.engine.common.ambermessage.WorkflowMessage.getInMemSize
 import edu.uci.ics.amber.engine.common.ambermessage.{ControlPayload, WorkflowFIFOMessage}
 import edu.uci.ics.amber.engine.common.virtualidentity.util.{CLIENT, CONTROLLER, SELF}
 import edu.uci.ics.amber.engine.common.{AmberConfig, CheckpointState, SerializedState}
-import edu.uci.ics.amber.virtualidentity.ChannelIdentity
+import edu.uci.ics.amber.core.virtualidentity.ChannelIdentity
 
 import scala.concurrent.duration.DurationInt
 
@@ -43,14 +42,12 @@ object Controller {
   def props(
       workflowContext: WorkflowContext,
       physicalPlan: PhysicalPlan,
-      opResultStorage: OpResultStorage,
       controllerConfig: ControllerConfig = ControllerConfig.default
   ): Props =
     Props(
       new Controller(
         workflowContext,
         physicalPlan,
-        opResultStorage,
         controllerConfig
       )
     )
@@ -59,7 +56,6 @@ object Controller {
 class Controller(
     workflowContext: WorkflowContext,
     physicalPlan: PhysicalPlan,
-    opResultStorage: OpResultStorage,
     controllerConfig: ControllerConfig
 ) extends WorkflowActor(
       controllerConfig.faultToleranceConfOpt,
@@ -70,7 +66,6 @@ class Controller(
   val controllerTimerService = new ControllerTimerService(controllerConfig, actorService)
   var cp = new ControllerProcessor(
     workflowContext,
-    opResultStorage,
     controllerConfig,
     actorId,
     logManager.sendCommitted

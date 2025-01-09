@@ -1,6 +1,5 @@
 package edu.uci.ics.amber.engine.architecture.controller
 
-import edu.uci.ics.amber.core.storage.result.OpResultStorage
 import edu.uci.ics.amber.core.workflow.WorkflowContext
 import edu.uci.ics.amber.engine.architecture.common.{
   AkkaActorRefMappingService,
@@ -13,11 +12,10 @@ import edu.uci.ics.amber.engine.architecture.logreplay.ReplayLogManager
 import edu.uci.ics.amber.engine.architecture.scheduling.WorkflowExecutionCoordinator
 import edu.uci.ics.amber.engine.architecture.worker.WorkflowWorker.MainThreadDelegateMessage
 import edu.uci.ics.amber.engine.common.ambermessage.WorkflowFIFOMessage
-import edu.uci.ics.amber.virtualidentity.ActorVirtualIdentity
+import edu.uci.ics.amber.core.virtualidentity.ActorVirtualIdentity
 
 class ControllerProcessor(
     workflowContext: WorkflowContext,
-    opResultStorage: OpResultStorage,
     controllerConfig: ControllerConfig,
     actorId: ActorVirtualIdentity,
     outputHandler: Either[MainThreadDelegateMessage, WorkflowFIFOMessage] => Unit
@@ -25,7 +23,7 @@ class ControllerProcessor(
 
   val workflowExecution: WorkflowExecution = WorkflowExecution()
   val workflowScheduler: WorkflowScheduler =
-    new WorkflowScheduler(workflowContext, opResultStorage, actorId)
+    new WorkflowScheduler(workflowContext, actorId)
   val workflowExecutionCoordinator: WorkflowExecutionCoordinator = new WorkflowExecutionCoordinator(
     () => this.workflowScheduler.getNextRegions,
     workflowExecution,

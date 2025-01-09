@@ -7,13 +7,22 @@ import edu.uci.ics.amber.engine.common.Utils.withTransaction
 import edu.uci.ics.amber.util.PathUtils
 import edu.uci.ics.texera.dao.SqlServer
 import edu.uci.ics.texera.web.auth.SessionUser
-import edu.uci.ics.texera.web.model.jooq.generated.enums.DatasetUserAccessPrivilege
-import edu.uci.ics.texera.web.model.jooq.generated.tables.Dataset.DATASET
-import edu.uci.ics.texera.web.model.jooq.generated.tables.DatasetUserAccess.DATASET_USER_ACCESS
-import edu.uci.ics.texera.web.model.jooq.generated.tables.DatasetVersion.DATASET_VERSION
-import edu.uci.ics.texera.web.model.jooq.generated.tables.User.USER
-import edu.uci.ics.texera.web.model.jooq.generated.tables.daos.{DatasetDao, DatasetUserAccessDao, DatasetVersionDao}
-import edu.uci.ics.texera.web.model.jooq.generated.tables.pojos.{Dataset, DatasetUserAccess, DatasetVersion, User}
+import edu.uci.ics.texera.dao.jooq.generated.enums.DatasetUserAccessPrivilege
+import edu.uci.ics.texera.dao.jooq.generated.tables.Dataset.DATASET
+import edu.uci.ics.texera.dao.jooq.generated.tables.DatasetUserAccess.DATASET_USER_ACCESS
+import edu.uci.ics.texera.dao.jooq.generated.tables.DatasetVersion.DATASET_VERSION
+import edu.uci.ics.texera.dao.jooq.generated.tables.User.USER
+import edu.uci.ics.texera.dao.jooq.generated.tables.daos.{
+  DatasetDao,
+  DatasetUserAccessDao,
+  DatasetVersionDao
+}
+import edu.uci.ics.texera.dao.jooq.generated.tables.pojos.{
+  Dataset,
+  DatasetUserAccess,
+  DatasetVersion,
+  User
+}
 import edu.uci.ics.texera.web.resource.dashboard.user.dataset.DatasetAccessResource._
 import edu.uci.ics.texera.web.resource.dashboard.user.dataset.DatasetResource.{context, _}
 import edu.uci.ics.texera.web.resource.dashboard.user.dataset.`type`.DatasetFileNode
@@ -364,7 +373,7 @@ object DatasetResource {
           }
 
           datasetOperation.filesToRemove.foreach { fileUri =>
-            new DatasetFileDocument(fileUri).remove()
+            new DatasetFileDocument(fileUri).clear()
           }
         }
       )

@@ -12,9 +12,9 @@ import edu.uci.ics.amber.engine.architecture.rpc.controlreturns.WorkflowAggregat
 }
 import edu.uci.ics.amber.engine.common.{AmberConfig, AmberLogging}
 import edu.uci.ics.amber.error.ErrorUtils.getStackTraceWithAllCauses
-import edu.uci.ics.amber.virtualidentity.ActorVirtualIdentity
-import edu.uci.ics.amber.workflowruntimestate.FatalErrorType.EXECUTION_FAILURE
-import edu.uci.ics.amber.workflowruntimestate.WorkflowFatalError
+import edu.uci.ics.amber.core.virtualidentity.ActorVirtualIdentity
+import edu.uci.ics.amber.core.workflowruntimestate.FatalErrorType.EXECUTION_FAILURE
+import edu.uci.ics.amber.core.workflowruntimestate.WorkflowFatalError
 import edu.uci.ics.texera.web.SessionState
 import edu.uci.ics.texera.web.model.websocket.response.ClusterStatusUpdateEvent
 import edu.uci.ics.texera.web.service.{WorkflowExecutionService, WorkflowService}
@@ -50,16 +50,13 @@ class ClusterListener extends Actor with AmberLogging {
       logger.info(s"received member event = $evt")
       updateClusterStatus(evt)
     case ClusterListener.GetAvailableNodeAddresses() =>
-      sender() ! getAllAddressExcludingMaster.toArray
+      sender() ! getAllAddress.toArray
     case other =>
       println(other)
   }
 
-  private def getAllAddressExcludingMaster: Iterable[Address] = {
+  private def getAllAddress: Iterable[Address] = {
     cluster.state.members
-      .filter { member =>
-        member.address != AmberConfig.masterNodeAddr
-      }
       .map(_.address)
   }
 
@@ -120,8 +117,7 @@ class ClusterListener extends Actor with AmberLogging {
       case other => //skip
     }
 
-    val addr = getAllAddressExcludingMaster
-    numWorkerNodesInCluster = addr.size
+    numWorkerNodesInCluster = getAllAddress.size
     SessionState.getAllSessionStates.foreach { state =>
       state.send(ClusterStatusUpdateEvent(numWorkerNodesInCluster))
     }

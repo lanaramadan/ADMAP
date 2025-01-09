@@ -16,7 +16,7 @@ import edu.uci.ics.texera.web.model.websocket.event.{
 import edu.uci.ics.texera.web.model.websocket.request.WorkflowExecuteRequest
 import edu.uci.ics.texera.web.storage.ExecutionStateStore
 import edu.uci.ics.texera.web.storage.ExecutionStateStore.updateWorkflowState
-import edu.uci.ics.texera.web.{SubscriptionManager, TexeraWebApplication, WebsocketInput}
+import edu.uci.ics.texera.web.{ComputingUnitMaster, SubscriptionManager, WebsocketInput}
 import edu.uci.ics.texera.workflow.{LogicalPlan, WorkflowCompiler}
 
 import java.net.URI
@@ -87,15 +87,17 @@ class WorkflowExecutionService(
   var executionConsoleService: ExecutionConsoleService = _
 
   def executeWorkflow(): Unit = {
-    workflow = new WorkflowCompiler(workflowContext).compile(
-      request.logicalPlan,
-      resultService.opResultStorage
-    )
+    try {
+      workflow = new WorkflowCompiler(workflowContext)
+        .compile(request.logicalPlan)
+    } catch {
+      case err: Throwable =>
+        errorHandler(err)
+    }
 
-    client = TexeraWebApplication.createAmberRuntime(
+    client = ComputingUnitMaster.createAmberRuntime(
       workflowContext,
       workflow.physicalPlan,
-      resultService.opResultStorage,
       controllerConfig,
       errorHandler
     )
@@ -112,7 +114,7 @@ class WorkflowExecutionService(
     executionConsoleService = new ExecutionConsoleService(client, executionStateStore, wsInput)
 
     logger.info("Starting the workflow execution.")
-    resultService.attachToExecution(executionStateStore, workflow.logicalPlan, client)
+    resultService.attachToExecution(executionStateStore, workflow.physicalPlan, client)
     executionStateStore.metadataStore.updateState(metadataStore =>
       updateWorkflowState(READY, metadataStore)
         .withFatalErrors(Seq.empty)
