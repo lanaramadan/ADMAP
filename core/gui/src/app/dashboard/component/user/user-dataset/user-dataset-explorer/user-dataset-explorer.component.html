@@ -125,8 +125,9 @@
     </nz-resize-handle>
     <div *ngIf="!isDisplayingDataset()">
       <div class="right-panel-title">
-        <h5 *ngIf="isCreatingDataset">Create a New Dataset</h5>
-        <h5 *ngIf="isCreatingVersion">Create a New Version</h5>
+        <h4 *ngIf="isCreatingDataset">Create a New Dataset</h4>
+        <h4 *ngIf="isCreatingVersion">Create a New Version</h4>
+        <h5>Enter Metadata:</h5>
       </div>
       <div class="dataset-version-creator">
         <texera-user-dataset-version-creator

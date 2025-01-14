@@ -2,10 +2,7 @@ package edu.uci.ics.texera.web.resource.dashboard.user.dataset
 
 import edu.uci.ics.amber.core.storage.{FileResolver, StorageConfig}
 import edu.uci.ics.amber.core.storage.model.DatasetFileDocument
-import edu.uci.ics.amber.core.storage.util.dataset.{
-  GitVersionControlLocalFileStorage,
-  PhysicalFileNode
-}
+import edu.uci.ics.amber.core.storage.util.dataset.{GitVersionControlLocalFileStorage, PhysicalFileNode}
 import edu.uci.ics.amber.engine.common.Utils.withTransaction
 import edu.uci.ics.amber.util.PathUtils
 import edu.uci.ics.texera.dao.SqlServer
@@ -36,7 +33,9 @@ import org.jooq.types.UInteger
 import org.jooq.{DSLContext, EnumType}
 import play.api.libs.json.Json
 
-import java.io.{IOException, InputStream, OutputStream}
+import java.nio.file.Paths
+import java.nio.file.Files
+import java.io.{File, IOException, InputStream, OutputStream}
 import java.net.{URI, URLDecoder}
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -260,24 +259,59 @@ object DatasetResource {
   }
 
   // create a new dataset version using the form data from frontend
+//  def createNewDatasetVersionFromFormData(
+//      ctx: DSLContext,
+//      did: UInteger,
+//      uid: UInteger,
+//      ownerEmail: String,
+//      userProvidedVersionName: String,
+//      multiPart: FormDataMultiPart
+//  ): Option[DashboardDatasetVersion] = {
+//    val datasetOperation = parseUserUploadedFormToDatasetOperations(did, multiPart)
+//    applyDatasetOperationToCreateNewVersion(
+//      ctx,
+//      did,
+//      uid,
+//      ownerEmail,
+//      userProvidedVersionName,
+//      datasetOperation
+//    )
+//  }
+
   def createNewDatasetVersionFromFormData(
-      ctx: DSLContext,
-      did: UInteger,
-      uid: UInteger,
-      ownerEmail: String,
-      userProvidedVersionName: String,
-      multiPart: FormDataMultiPart
-  ): Option[DashboardDatasetVersion] = {
+         ctx: DSLContext,
+         did: UInteger,
+         uid: UInteger,
+         ownerEmail: String,
+         userProvidedVersionName: String,
+         multiPart: FormDataMultiPart
+       ): Option[DashboardDatasetVersion] = {
     val datasetOperation = parseUserUploadedFormToDatasetOperations(did, multiPart)
-    applyDatasetOperationToCreateNewVersion(
-      ctx,
-      did,
-      uid,
-      ownerEmail,
-      userProvidedVersionName,
-      datasetOperation
-    )
+
+    // if no files were provided (both to add and to remove), we can still create a version without file changes
+    if (datasetOperation.filesToAdd.isEmpty && datasetOperation.filesToRemove.isEmpty) {
+      val versionName = generateDatasetVersionName(ctx, did, userProvidedVersionName)
+      return applyDatasetOperationToCreateNewVersion(
+        ctx,
+        did,
+        uid,
+        ownerEmail,
+        versionName,
+        DatasetOperation(Map(), List()) // no files to add or remove
+      )
+    } else {
+      // if files are provided, proceed as usual
+      return applyDatasetOperationToCreateNewVersion(
+        ctx,
+        did,
+        uid,
+        ownerEmail,
+        userProvidedVersionName,
+        datasetOperation
+      )
+    }
   }
+
 
   // Private method to get user datasets
   private def getUserDatasets(ctx: DSLContext, uid: UInteger): List[Dataset] = {
@@ -425,6 +459,8 @@ object DatasetResource {
   case class DatasetIDs(dids: List[UInteger])
 
   case class DatasetNameModification(did: UInteger, name: String)
+  case class CreateDirectoryRequest(username: UInteger, did: UInteger)
+
 
   case class DatasetDescriptionModification(did: UInteger, description: String)
 
@@ -487,6 +523,28 @@ object DatasetResource {
 class DatasetResource {
 
   @POST
+  @Path("/create-directory")
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  def createDirectory(
+           @Auth user: SessionUser,
+           createDirectoryRequest: CreateDirectoryRequest
+         ): Response = {
+    val did = createDirectoryRequest.did
+    val username = createDirectoryRequest.username
+
+    withTransaction(context) { ctx =>
+      val uid = user.getUid
+
+      // Construct the directory path in the required format /username/did
+      val directoryPath = Paths.get(s"./$username/$did")
+      Files.createDirectories(directoryPath)
+
+      Response.ok().entity(s"Directory '/$username/$did' created successfully.").build()
+    }
+  }
+
+
+  @POST
   @Path("/create")
   @Consumes(Array(MediaType.MULTIPART_FORM_DATA))
   def createDataset(
@@ -536,12 +594,12 @@ class DatasetResource {
       val createdVersion =
         createNewDatasetVersionFromFormData(ctx, did, uid, user.getEmail, initialVersionName, files)
 
-      createdVersion match {
-        case Some(_) =>
-        case None    =>
-          // none means creation failed, user does not submit any files when creating the dataset
-          throw new BadRequestException(ERR_DATASET_CREATION_FAILED_MESSAGE)
-      }
+//      createdVersion match {
+//        case Some(_) =>
+//        case None    =>
+//          // none means creation failed, user does not submit any files when creating the dataset
+//          throw new BadRequestException(ERR_DATASET_CREATION_FAILED_MESSAGE)
+//      }
 
       DashboardDataset(
         new Dataset(

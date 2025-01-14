@@ -3,6 +3,7 @@
     [nzSpinning]="isUploading"
     nzSize="large"
     nzTip="Uploading...">
+
     <div
       class="texera-user-dataset-creator-form"
       [ngClass]="{'disabled-backdrop': isUploading}">
@@ -10,6 +11,12 @@
         [form]="form"
         [fields]="fields"
         [model]="model"></formly-form>
+
+      <div class="file-uploader">
+        <texera-user-contributors-form>
+        </texera-user-contributors-form>
+      </div>
+
       <nz-switch
         *ngIf="!isCreatingVersion"
         [ngModel]="isDatasetPublic"
@@ -17,14 +24,6 @@
         nzCheckedChildren="public"
         nzUnCheckedChildren="private"></nz-switch>
     </div>
-    <div class="file-uploader">
-      <texera-user-files-uploader
-        (uploadedFiles)="onNewUploadFilesChanged($event)"
-        (removingFilePaths)="onRemovingFilePathsChanged($event)"
-        [previouslyUploadFiles]="baseVersion?.fileNodes">
-      </texera-user-files-uploader>
-    </div>
-
     <button
       nz-button
       nzType="primary"
