@@ -1,3 +1,4 @@
+
 export const DASHBOARD = "/dashboard";
 export const DASHBOARD_HOME = `${DASHBOARD}/home`;
 export const DASHBOARD_ABOUT = `${DASHBOARD}/about`;
@@ -8,6 +9,8 @@ export const DASHBOARD_HUB_WORKFLOW_RESULT = `${DASHBOARD_HUB_WORKFLOW}/result`;
 export const DASHBOARD_HUB_WORKFLOW_RESULT_DETAIL = `${DASHBOARD_HUB_WORKFLOW_RESULT}/detail`;
 
 export const DASHBOARD_USER = `${DASHBOARD}/user`;
+export const DASHBOARD_USER_PROFILE = `${DASHBOARD_USER}/profile`;
+
 export const DASHBOARD_USER_PROJECT = `${DASHBOARD_USER}/project`;
 export const DASHBOARD_USER_WORKSPACE = `${DASHBOARD_USER}/workspace`;
 export const DASHBOARD_USER_WORKFLOW = `${DASHBOARD_USER}/workflow`;

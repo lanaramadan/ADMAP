@@ -3,7 +3,7 @@ import { UserService } from "../../../../common/service/user/user.service";
 import { User } from "../../../../common/type/user";
 import { UntilDestroy } from "@ngneat/until-destroy";
 import { Router } from "@angular/router";
-import { DASHBOARD_HOME } from "../../../../app-routing.constant";
+import { DASHBOARD_HOME, DASHBOARD_USER_PROFILE } from "../../../../app-routing.constant";
 
 /**
  * UserIconComponent is used to control user system on the top right corner
@@ -25,6 +25,14 @@ export class UserIconComponent {
   ) {
     this.user = this.userService.getCurrentUser();
   }
+
+  /**
+   * handle the event when user click on the profile button
+   */
+  public navigateToProfile(): void {
+    this.router.navigate([DASHBOARD_USER_PROFILE]);
+  }
+
 
   /**
    * handle the event when user click on the logout button

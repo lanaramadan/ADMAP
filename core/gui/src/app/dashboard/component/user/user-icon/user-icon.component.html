@@ -11,6 +11,11 @@
 <nz-dropdown-menu #menu="nzDropdownMenu">
   <ul nz-menu>
     <li
+      (click)="navigateToProfile()"
+      nz-menu-item>
+      Profile
+    </li>
+    <li
       (click)="onClickLogout()"
       nz-menu-item>
       Sign Out
