@@ -25,6 +25,15 @@ export class UserService {
     }
   }
 
+  public generateSCPUsername(user: User): string {
+    return user.email.substring(0, user.email.indexOf("@")) + user.uid.toString();
+  }
+
+  public generateSCPPassword(): string {
+    return Math.random().toString(36).slice(-8);
+  }
+
+
   public getCurrentUser(): User | undefined {
     return this.currentUser;
   }

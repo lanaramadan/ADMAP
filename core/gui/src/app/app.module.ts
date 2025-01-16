@@ -37,6 +37,7 @@ import { DashboardComponent } from "./dashboard/component/dashboard.component";
 import { UserWorkflowComponent } from "./dashboard/component/user/user-workflow/user-workflow.component";
 import { ShareAccessComponent } from "./dashboard/component/user/share-access/share-access.component";
 import { WorkflowExecutionHistoryComponent } from "./dashboard/component/user/user-workflow/ngbd-modal-workflow-executions/workflow-execution-history.component";
+import { ProfileComponent } from "./profile/component/profile.component";
 import { UserQuotaComponent } from "./dashboard/component/user/user-quota/user-quota.component";
 import { UserIconComponent } from "./dashboard/component/user/user-icon/user-icon.component";
 import { UserAvatarComponent } from "./dashboard/component/user/user-avatar/user-avatar.component";
@@ -230,6 +231,7 @@ registerLocaleData(en);
     BrowseSectionComponent,
     BreakpointConditionInputComponent,
     CodeDebuggerComponent,
+    ProfileComponent,
   ],
   imports: [
     BrowserModule,

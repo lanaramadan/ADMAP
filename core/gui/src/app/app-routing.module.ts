@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { environment } from "../environments/environment";
+import { ProfileComponent } from "./profile/component/profile.component";
 import { DashboardComponent } from "./dashboard/component/dashboard.component";
 import { UserWorkflowComponent } from "./dashboard/component/user/user-workflow/user-workflow.component";
 import { UserQuotaComponent } from "./dashboard/component/user/user-quota/user-quota.component";
@@ -96,6 +97,10 @@ if (environment.userSystemEnabled) {
           {
             path: "discussion",
             component: FlarumComponent,
+          },
+          {
+            path: "profile",
+            component: ProfileComponent,
           },
         ],
       },

@@ -1,0 +1,47 @@
+.profile-container {
+  overflow-y: auto;
+  height: 100%;
+  padding: 0 133px;
+}
+
+.content {
+  margin-top: 40px;
+  max-width: 1600px;
+  width: 100%;
+  text-align: left;
+}
+
+.content > h1 {
+  font-size: 40px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.content > h2 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.content > p {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+
+button {
+  background-color: #ffffff;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  padding: 5px 10px;
+  margin-left: 10px;
+  font-size: 14px;
+  color: #4a4a4a;
+
+  &:hover {
+    background-color: #f5f5f5; /* Slightly darker on hover */
+    border-color: #c0c0c0;
+  }
+}
+
