@@ -1,5 +1,24 @@
 <div class="profile-container">
-  <h1>User Profile</h1>
-  <p>Name: {{ user?.name }}</p>
-  <p>Email: {{ user?.email }}</p>
+  <div
+    nz-col
+    nzFlex="auto"
+    class="content">
+    <h1>User Profile</h1>
+    <p><strong>Name: </strong>{{ user?.name }}</p>
+    <p><strong>Email: </strong>{{ user?.email }}</p>
+
+    <br />
+
+    <p><b>Use the below credentials to SCP your raw data.</b></p>
+    <p><strong>Username: </strong>{{ username }}</p>
+    <p>
+      <strong>Password: </strong>
+      <span *ngIf="!showPassword">********</span>
+      <span *ngIf="showPassword">{{ password }}</span>
+      <button (click)="togglePasswordVisibility()">
+        {{ showPassword ? "Hide" : "Show" }}
+      </button>
+    </p>
+
+    </div>
 </div>
