@@ -3,7 +3,7 @@ import { Observable, of, ReplaySubject } from "rxjs";
 import { Role, User } from "../../type/user";
 import { AuthService } from "./auth.service";
 import { environment } from "../../../../environments/environment";
-import { catchError, map, shareReplay } from "rxjs/operators";
+import { catchError, map, shareReplay, switchMap } from "rxjs/operators";
 
 /**
  * User Service manages User information. It relies on different
@@ -17,6 +17,7 @@ export class UserService {
   private userChangeSubject: ReplaySubject<User | undefined> = new ReplaySubject<User | undefined>(1);
   private cache = new Map<string, { url: string; expiry: number }>();
   private readonly cacheDuration = 3600 * 1000; // cache duration: 1h
+  private scpUsername: string = "";
   private scpPassword: string = this.generateSCPPassword();
 
   constructor(private authService: AuthService) {
@@ -27,7 +28,8 @@ export class UserService {
   }
 
   public generateSCPUsername(user: User): string {
-    return user.email.substring(0, user.email.indexOf("@")) + "_" + user.uid.toString();
+    this.scpUsername = user.email.substring(0, user.email.indexOf("@")) + "_" + user.uid.toString();
+    return this.scpUsername;
   }
 
   public getSCPPassword(): string {
@@ -42,9 +44,6 @@ export class UserService {
     this.scpPassword = this.generateSCPPassword();
     return this.scpPassword;
   }
-
-
-
 
   public getCurrentUser(): User | undefined {
     return this.currentUser;
@@ -81,7 +80,19 @@ export class UserService {
   public register(username: string, password: string): Observable<void> {
     return this.authService
       .register(username, password)
-      .pipe(map(({ accessToken }) => this.handleAccessToken(accessToken)));
+      .pipe(
+        map(({ accessToken }) => {
+          this.handleAccessToken(accessToken);
+          return this.currentUser;
+        }),
+        // TODO REMOVE
+        // @ts-ignore
+        switchMap(() => this.authService.addLdapUser(this.scpUsername, this.scpPassword))
+      );
+
+      // .register(username, password)
+      // .pipe(
+      //   map(({ accessToken }) => this.handleAccessToken(accessToken)));
   }
 
   /**
