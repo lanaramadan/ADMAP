@@ -10,14 +10,15 @@
     <br />
 
     <p><b>Use the below credentials to SCP your raw data.</b></p>
-    <p><strong>Username: </strong>{{ username }}</p>
+    <p><strong>Username: </strong>{{ scpUsername }}</p>
     <p>
       <strong>Password: </strong>
       <span *ngIf="!showPassword">********</span>
-      <span *ngIf="showPassword">{{ password }}</span>
+      <span *ngIf="showPassword">{{ scpPassword }}</span>
       <button (click)="togglePasswordVisibility()">
         {{ showPassword ? "Hide" : "Show" }}
       </button>
+      <button (click)="regeneratePassword()">Regenerate Password</button>
     </p>
 
     </div>

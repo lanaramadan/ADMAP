@@ -9,8 +9,8 @@ import { User } from "../../common/type/user";
 })
 export class ProfileComponent {
   public user: User | undefined;
-  public username : string | undefined;
-  public password : string | undefined;
+  public scpUsername : string | undefined;
+  public scpPassword: string | undefined;
   public showPassword: boolean = false;
 
   constructor(
@@ -19,8 +19,9 @@ export class ProfileComponent {
     this.user = this.userService.getCurrentUser();
 
     if (this.user) {
-      this.username = this.userService.generateSCPUsername(this.user);
-      this.password = this.userService.generateSCPPassword();
+      // this.scpUsername = this.userService.getSCPUsername();
+      this.scpUsername = this.userService.generateSCPUsername(this.user);
+      this.scpPassword = this.userService.getSCPPassword();
     }
   }
 
@@ -28,4 +29,7 @@ export class ProfileComponent {
     this.showPassword = !this.showPassword;
   }
 
+  regeneratePassword(): void {
+    this.scpPassword = this.userService.regenerateSCPPassword();
+  }
 }
