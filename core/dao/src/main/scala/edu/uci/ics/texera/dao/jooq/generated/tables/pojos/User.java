@@ -22,6 +22,11 @@ public class User implements IUser {
     private String   name;
     private String   email;
     private String   password;
+
+    private String   scpUsername;
+
+    private String   scpPassword;
+
     private String   googleId;
     private UserRole role;
     private String   googleAvatar;
@@ -33,6 +38,8 @@ public class User implements IUser {
         this.name = value.getName();
         this.email = value.getEmail();
         this.password = value.getPassword();
+        this.scpUsername = getScpUsername();
+        this.scpPassword = getScpPassword();
         this.googleId = value.getGoogleId();
         this.role = value.getRole();
         this.googleAvatar = value.getGoogleAvatar();
@@ -43,6 +50,8 @@ public class User implements IUser {
         String   name,
         String   email,
         String   password,
+        String   scpUsername,
+        String   scpPassword,
         String   googleId,
         UserRole role,
         String   googleAvatar
@@ -51,6 +60,8 @@ public class User implements IUser {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.scpUsername = scpUsername;
+        this.scpPassword = scpPassword;
         this.googleId = googleId;
         this.role = role;
         this.googleAvatar = googleAvatar;
@@ -94,6 +105,18 @@ public class User implements IUser {
     @Override
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getScpUsername() {return this.scpUsername;}
+
+    public void setScpUsername(String scpUsername) {
+        this.scpUsername = scpUsername;
+    }
+
+    public String getScpPassword() {return this.scpPassword;}
+
+    public void setScpPassword(String scpPassword) {
+        this.scpPassword = scpPassword;
     }
 
     @Override
