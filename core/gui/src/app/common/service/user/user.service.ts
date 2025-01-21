@@ -17,6 +17,7 @@ export class UserService {
   private userChangeSubject: ReplaySubject<User | undefined> = new ReplaySubject<User | undefined>(1);
   private cache = new Map<string, { url: string; expiry: number }>();
   private readonly cacheDuration = 3600 * 1000; // cache duration: 1h
+  private scpPassword: string = this.generateSCPPassword();
 
   constructor(private authService: AuthService) {
     if (environment.userSystemEnabled) {
@@ -26,12 +27,23 @@ export class UserService {
   }
 
   public generateSCPUsername(user: User): string {
-    return user.email.substring(0, user.email.indexOf("@")) + user.uid.toString();
+    return user.email.substring(0, user.email.indexOf("@")) + "_" + user.uid.toString();
   }
 
-  public generateSCPPassword(): string {
+  public getSCPPassword(): string {
+    return this.scpPassword;
+  }
+
+  private generateSCPPassword(): string {
     return Math.random().toString(36).slice(-8);
   }
+
+  public regenerateSCPPassword(): string {
+    this.scpPassword = this.generateSCPPassword();
+    return this.scpPassword;
+  }
+
+
 
 
   public getCurrentUser(): User | undefined {
