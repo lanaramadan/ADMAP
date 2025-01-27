@@ -23,7 +23,7 @@ import javax.ws.rs._
 import javax.ws.rs.core.MediaType
 
 
-import com.unboundid.ldap.sdk.{LDAPConnection, LDAPConnectionOptions, Entry, ResultCode}
+import com.unboundid.ldap.sdk.{LDAPConnection, LDAPConnectionOptions, Entry, ResultCode, AddRequest}
 import com.unboundid.ldap.sdk._
 import com.unboundid.ldap.sdk.extensions._
 
@@ -59,11 +59,7 @@ object AuthResource {
 
 
   def addUserToLdap(ldapUser: User) = {
-    println("IN addUserToLdap")
-    println(s"Adding user to LDAP: ${ldapUser.getScpUsername()}")
-
-    // LDAP server configuration
-    val ldapHost = "ldap://3.139.234.0"
+    val ldapHost = "18.218.220.7"
     val ldapPort = 389
     val ldapBindDN = "cn=admin,dc=admap,dc=com"
     val ldapBindPassword = "23627"
@@ -73,57 +69,36 @@ object AuthResource {
     val username = ldapUser.getScpUsername()
     val uid = username.split("_")(1)
     val password = ldapUser.getScpPassword()
-    val userDN = s"uid=$username,ou=users,$baseDN"
 
-    // Create an LDAP connection
-    val connectionOptions = new LDAPConnectionOptions()
-    connectionOptions.setConnectTimeoutMillis(5000)
-
-    // Use SSL/TLS if connecting to LDAPS (port 636)
-    val connection = new LDAPConnection(ldapHost, ldapPort)
-
+    var connection: LDAPConnection = null
     try {
-      // Bind to the LDAP server as the admin
-      connection.bind(ldapBindDN, ldapBindPassword)
+      connection = new LDAPConnection(ldapHost, ldapPort, ldapBindDN, ldapBindPassword)
+      val entry = new Entry(s"uid=$username,ou=users,$baseDN")
 
-      // Create the user entry
-      val userEntry = new Entry(
-        userDN,
-        "objectClass: inetOrgPerson",
-        "objectClass: posixAccount",
-        "objectClass: top",
-        s"uid: $username",
-        s"cn: $username",
-        s"sn: $username",
-        "loginShell: /bin/bash",
-        s"uidNumber: ${uid}",
-        "gidNumber: 1000",
-        s"homeDirectory: /home/users/$username"
-      )
 
-      // Add the user entry to LDAP
-      connection.add(userEntry)
-      println(s"User $username added to LDAP.")
+      entry.addAttribute("objectClass", "inetOrgPerson", "posixAccount", "shadowAccount")
+      entry.addAttribute("uid", username)
+      entry.addAttribute("cn", username)
+      entry.addAttribute("sn", username)
+      // TODO password has to be user's pw
+      entry.addAttribute("userPassword", "{SSHA}aTAqVEiboLtxnjZzfcB/ViDBNaVhvsDu")
+      entry.addAttribute("loginShell", "/bin/bash")
+      entry.addAttribute("uidNumber", uid.toString)
+      entry.addAttribute("gidNumber", "5000")
+      entry.addAttribute("homeDirectory", s"/home/users/$username")
 
-      // Set the user's password
-      val passwordModifyRequest = new PasswordModifyExtendedRequest(
-        userDN, // User's DN
-        null, // Old password (null for new user)
-        password // New password
-      )
-      val passwordModifyResult = connection.processExtendedOperation(passwordModifyRequest)
-      if (passwordModifyResult.getResultCode == ResultCode.SUCCESS) {
-        println(s"Password set for user $username.")
-      } else {
-        println(s"Failed to set password for user $username: ${passwordModifyResult.getResultCode}")
-      }
+      // Use AddRequest explicitly
+      val addRequest = new AddRequest(entry)
+      connection.add(addRequest)
 
     } catch {
       case e: LDAPException =>
         println(s"LDAP error: ${e.getMessage}")
+        throw e
     } finally {
-      // Close the connection
-      connection.close()
+      if (connection != null && connection.isConnected) {
+        connection.close()
+      }
     }
   }
 
@@ -196,19 +171,13 @@ class AuthResource {
   @POST
   @Path("/add-ldap-user")
   def addLdapUser(request: LdapUserRegistrationRequest): TokenIssueResponse = {
-    println("IN ROUTE")
     val scpUsername = request.scpUsername
     val scpPassword = request.scpPassword
 
     val ldapUser = new User
     ldapUser.setScpUsername(scpUsername)
     ldapUser.setScpPassword(scpPassword)
-
-    // add user to LDAP
     addUserToLdap(ldapUser)
-
-    // Create home directory - not needed anymore because of pam
-    // createHomeDirectory(s"/users/$scpUsername")
 
     TokenIssueResponse(jwtToken(jwtClaims(ldapUser, dayToMin(TOKEN_EXPIRE_TIME_IN_DAYS))))
   }
