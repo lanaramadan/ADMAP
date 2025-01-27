@@ -38,11 +38,11 @@ public class User implements IUser {
         this.name = value.getName();
         this.email = value.getEmail();
         this.password = value.getPassword();
-        this.scpUsername = getScpUsername();
-        this.scpPassword = getScpPassword();
         this.googleId = value.getGoogleId();
         this.role = value.getRole();
         this.googleAvatar = value.getGoogleAvatar();
+        this.scpUsername = getScpUsername();
+        this.scpPassword = getScpPassword();
     }
 
     public User(
@@ -50,21 +50,21 @@ public class User implements IUser {
         String   name,
         String   email,
         String   password,
-        String   scpUsername,
-        String   scpPassword,
         String   googleId,
         UserRole role,
-        String   googleAvatar
+        String   googleAvatar,
+        String   scpUsername,
+        String   scpPassword
     ) {
         this.uid = uid;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.scpUsername = scpUsername;
-        this.scpPassword = scpPassword;
         this.googleId = googleId;
         this.role = role;
         this.googleAvatar = googleAvatar;
+        this.scpUsername = scpUsername != null ? scpUsername : "";
+        this.scpPassword = scpPassword != null ? scpPassword : "";
     }
 
     @Override

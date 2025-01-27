@@ -18,7 +18,7 @@ import javax.ws.rs.core.SecurityContext
     override protected def newInstance = new GuestAuthFilter
   }
 
-  val GUEST: User = new User(null, "guest", null, null, null, UserRole.REGULAR, null)
+  val GUEST: User = new User(null, "guest", null, null, null, UserRole.REGULAR, null, null, null)
 }
 
 @PreMatching
