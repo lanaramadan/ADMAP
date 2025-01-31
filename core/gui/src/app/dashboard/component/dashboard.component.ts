@@ -30,7 +30,8 @@ export class DashboardComponent implements OnInit {
   @ViewChild(HubComponent) hubComponent!: HubComponent;
 
   isAdmin: boolean = this.userService.isAdmin();
-  isLogin: boolean = this.userService.isLogin();
+  isLogin = this.userService.isLogin();
+  googleLogin: boolean = environment.googleLogin;
   displayForum: boolean = true;
   displayNavbar: boolean = true;
   isCollpased: boolean = false;
