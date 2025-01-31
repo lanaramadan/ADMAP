@@ -25,7 +25,10 @@ import javax.ws.rs.core.MediaType
 
 import com.unboundid.ldap.sdk.{LDAPConnection, LDAPConnectionOptions, Entry, ResultCode, AddRequest}
 import com.unboundid.ldap.sdk._
-import com.unboundid.ldap.sdk.extensions._
+
+
+import com.jcraft.jsch._
+import java.nio.file.{Paths, Files}
 
 object AuthResource {
 
@@ -59,7 +62,7 @@ object AuthResource {
 
 
   def addUserToLdap(ldapUser: User) = {
-    val ldapHost = "18.218.220.7"
+    val ldapHost = "3.129.210.205"
     val ldapPort = 389
     val ldapBindDN = "cn=admin,dc=admap,dc=com"
     val ldapBindPassword = "23627"
@@ -80,10 +83,9 @@ object AuthResource {
       entry.addAttribute("uid", username)
       entry.addAttribute("cn", username)
       entry.addAttribute("sn", username)
-      // TODO password has to be user's pw
-      entry.addAttribute("userPassword", "{SSHA}aTAqVEiboLtxnjZzfcB/ViDBNaVhvsDu")
+      entry.addAttribute("userPassword", password)
       entry.addAttribute("loginShell", "/bin/bash")
-      entry.addAttribute("uidNumber", uid.toString)
+      entry.addAttribute("uidNumber", uid)
       entry.addAttribute("gidNumber", "5000")
       entry.addAttribute("homeDirectory", s"/home/users/$username")
 
@@ -93,8 +95,9 @@ object AuthResource {
 
     } catch {
       case e: LDAPException =>
-        println(s"LDAP error: ${e.getMessage}")
+        println(s"LDAP error: ${e.getMessage}, Code: ${e.getResultCode}")
         throw e
+
     } finally {
       if (connection != null && connection.isConnected) {
         connection.close()
@@ -102,19 +105,51 @@ object AuthResource {
     }
   }
 
-  def createHomeDirectory(path: String): Boolean = {
-    val file = new java.io.File(path)
-    if (!file.exists()) {
-      file.mkdirs()
-      println(s"Home directory created at $path")
-      true
-    } else {
-      println(s"Home directory already exists at $path")
-      false
+  def createHomeDirectory(ldapUser: User): Boolean = {
+    val username = ldapUser.getScpUsername()
+    val path = s"/home/users/$username/"
+
+    val sshHost = "3.129.210.205"
+    val sshUser = "ubuntu"
+    val privateKeyPath = "/Users/lanaramadan/Desktop/ADMAP/core/012624.pem"
+
+    val command = s"sudo mkdir -p $path"
+
+    var session: Session = null
+
+    try {
+      val jsch = new JSch()
+      jsch.addIdentity(privateKeyPath)
+
+      session = jsch.getSession(sshUser, sshHost, 22)
+      session.setConfig("StrictHostKeyChecking", "no")
+
+      session.connect()
+
+      val channel = session.openChannel("exec").asInstanceOf[ChannelExec]
+      channel.setCommand(command)
+      channel.setErrStream(System.err)
+      channel.connect()
+
+      if (channel.getExitStatus == 0) {
+        println(s"Home directory created at $path")
+        true
+      } else {
+        println(s"Failed to create home directory at $path")
+        false
+      }
+    } catch {
+      case e: Exception =>
+        println(s"Error: ${e.getMessage}")
+        e.printStackTrace()
+        false
+    } finally {
+      // Ensure the session is disconnected
+      if (session != null && session.isConnected) {
+        session.disconnect()
+      }
     }
   }
-
-
 }
 
 @Path("/auth/")
@@ -178,6 +213,7 @@ class AuthResource {
     ldapUser.setScpUsername(scpUsername)
     ldapUser.setScpPassword(scpPassword)
     addUserToLdap(ldapUser)
+    createHomeDirectory(ldapUser)
 
     TokenIssueResponse(jwtToken(jwtClaims(ldapUser, dayToMin(TOKEN_EXPIRE_TIME_IN_DAYS))))
   }
