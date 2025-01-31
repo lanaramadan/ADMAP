@@ -143,6 +143,7 @@ import { SocialLoginModule, SocialAuthServiceConfig, GoogleSigninButtonModule } 
 import { GoogleLoginProvider } from "@abacritt/angularx-social-login";
 import { lastValueFrom } from "rxjs";
 import { HubSearchResultComponent } from "./hub/component/hub-search-result/hub-search-result.component";
+import { FileDirectoryComponent } from "./dashboard/component/user/file-directory/file-directory.component";
 
 registerLocaleData(en);
 
@@ -232,6 +233,7 @@ registerLocaleData(en);
     CodeDebuggerComponent,
     ProfileComponent,
     HubSearchResultComponent,
+    FileDirectoryComponent,
   ],
   imports: [
     BrowserModule,
