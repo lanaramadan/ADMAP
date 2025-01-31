@@ -20,7 +20,7 @@ export class ProfileComponent {
 
     if (this.user) {
       // this.scpUsername = this.userService.getSCPUsername();
-      this.scpUsername = this.userService.generateSCPUsername(this.user);
+      this.scpUsername = this.userService.getSCPUsername();
       this.scpPassword = this.userService.getSCPPassword();
     }
   }

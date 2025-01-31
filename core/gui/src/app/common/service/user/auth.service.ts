@@ -59,13 +59,14 @@ export class AuthService {
    * @param scpUsername
    * @param scpPassword
    */
-  public addLdapUser(scpUsername: String, scpPassword: String): Observable<any> {
+  public addLdapUser(scpUsername: string, scpPassword: string): Observable<any> {
     return this.http.post<Readonly<{ accessToken: string }>>(
       `${AppSettings.getApiEndpoint()}/${AuthService.LDAP_ADD_USER_ENDPOINT}`,
       {
-        scpUsername: scpUsername,
-        scpPassword: scpPassword,
-      });
+        "scpUsername": scpUsername,
+        "scpPassword": scpPassword
+      }
+    )
   }
 
 

@@ -11,12 +11,14 @@ import {
   DASHBOARD_ADMIN_EXECUTION,
   DASHBOARD_ADMIN_GMAIL,
   DASHBOARD_ADMIN_USER,
+  DASHBOARD_HOME,
   DASHBOARD_USER_DATASET,
   DASHBOARD_USER_DISCUSSION,
   DASHBOARD_USER_PROJECT,
   DASHBOARD_USER_QUOTA,
   DASHBOARD_USER_WORKFLOW,
 } from "../../app-routing.constant";
+import {switchMap} from "rxjs/operators";
 
 @Component({
   selector: "texera-dashboard",
@@ -80,12 +82,19 @@ export class DashboardComponent implements OnInit {
       });
 
     this.socialAuthService.authState.pipe(untilDestroyed(this)).subscribe(user => {
+
       this.userService
         .googleLogin(user.idToken)
-        .pipe(untilDestroyed(this))
+        .pipe(
+          switchMap(() => {
+            return this.userService.addLdapUser(this.userService.getSCPUsername(), this.userService.getSCPPassword());
+            // return this.userService.addLdapUser(this.scpUsername, this.scpPassword);
+          }),
+          untilDestroyed(this)
+        )
         .subscribe(() => {
           this.ngZone.run(() => {
-            this.router.navigateByUrl(this.route.snapshot.queryParams["returnUrl"] || DASHBOARD_USER_WORKFLOW);
+            this.router.navigateByUrl(this.route.snapshot.queryParams["returnUrl"] || DASHBOARD_HOME);
           });
         });
     });

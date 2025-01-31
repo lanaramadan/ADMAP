@@ -3,7 +3,7 @@ import { Observable, of, ReplaySubject } from "rxjs";
 import { Role, User } from "../../type/user";
 import { AuthService } from "./auth.service";
 import { environment } from "../../../../environments/environment";
-import { catchError, map, shareReplay, switchMap } from "rxjs/operators";
+import {catchError, map, shareReplay} from "rxjs/operators";
 
 /**
  * User Service manages User information. It relies on different
@@ -18,7 +18,7 @@ export class UserService {
   private cache = new Map<string, { url: string; expiry: number }>();
   private readonly cacheDuration = 3600 * 1000; // cache duration: 1h
   private scpUsername: string = "";
-  private scpPassword: string = this.generateSCPPassword();
+  private scpPassword: string = "";
 
   constructor(private authService: AuthService) {
     if (environment.userSystemEnabled) {
@@ -27,8 +27,12 @@ export class UserService {
     }
   }
 
-  public generateSCPUsername(user: User): string {
-    this.scpUsername = user.email.substring(0, user.email.indexOf("@")) + "_" + user.uid.toString();
+  public getSCPUsername(): string {
+    return this.scpUsername;
+  }
+
+  public generateSCPUsername(user: User | undefined): string {
+    this.scpUsername = user?.email.substring(0, user.email.indexOf("@")) + "_" + user?.uid.toString();
     return this.scpUsername;
   }
 
@@ -37,7 +41,9 @@ export class UserService {
   }
 
   private generateSCPPassword(): string {
-    return Math.random().toString(36).slice(-8);
+    // return Math.random().toString(36).slice(-8);
+    this.scpPassword = "1234";
+    return this.scpPassword;
   }
 
   public regenerateSCPPassword(): string {
@@ -77,22 +83,19 @@ export class UserService {
     this.changeUser(undefined);
   }
 
+
+
   public register(username: string, password: string): Observable<void> {
+    console.log("in register?")
     return this.authService
       .register(username, password)
-      .pipe(
-        map(({ accessToken }) => {
-          this.handleAccessToken(accessToken);
-          return this.currentUser;
-        }),
-        // TODO REMOVE
-        // @ts-ignore
-        switchMap(() => this.authService.addLdapUser(this.scpUsername, this.scpPassword))
-      );
+      .pipe(map(({ accessToken }) => this.handleAccessToken(accessToken)));
+  }
 
-      // .register(username, password)
-      // .pipe(
-      //   map(({ accessToken }) => this.handleAccessToken(accessToken)));
+  public addLdapUser(username: string, password: string): Observable<void> {
+    return this.authService
+      .addLdapUser(username, password)
+      .pipe(map(({ accessToken }) => this.handleAccessToken(accessToken)));
   }
 
   /**
@@ -113,7 +116,12 @@ export class UserService {
 
   private handleAccessToken(accessToken: string): void {
     AuthService.setAccessToken(accessToken);
-    this.changeUser(this.authService.loginWithExistingToken());
+    const user = this.authService.loginWithExistingToken();
+    this.changeUser(user);
+
+    this.generateSCPUsername(this.currentUser);
+    this.generateSCPPassword();
+
   }
 
   /**
