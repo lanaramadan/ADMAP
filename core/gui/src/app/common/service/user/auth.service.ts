@@ -26,6 +26,7 @@ export class AuthService {
   public static readonly LOGIN_ENDPOINT = "auth/login";
   public static readonly REFRESH_TOKEN = "auth/refresh";
   public static readonly REGISTER_ENDPOINT = "auth/register";
+  public static readonly LDAP_ADD_USER_ENDPOINT = "auth/add-ldap-user";
   public static readonly GOOGLE_LOGIN_ENDPOINT = "auth/google/login";
 
   private tokenExpirationSubscription?: Subscription;
@@ -52,6 +53,22 @@ export class AuthService {
       }
     );
   }
+
+  /**
+   * This method will handle the request for adding the user to the LDAP server
+   * @param scpUsername
+   * @param scpPassword
+   */
+  public addLdapUser(scpUsername: string, scpPassword: string): Observable<any> {
+    return this.http.post<Readonly<{ accessToken: string }>>(
+      `${AppSettings.getApiEndpoint()}/${AuthService.LDAP_ADD_USER_ENDPOINT}`,
+      {
+        "scpUsername": scpUsername,
+        "scpPassword": scpPassword
+      }
+    )
+  }
+
 
   /**
    * This method will handle the request for Google login.
