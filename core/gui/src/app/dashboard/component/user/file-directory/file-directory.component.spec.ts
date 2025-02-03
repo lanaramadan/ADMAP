@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { FileDirectoryComponent } from './file-directory.component';
+import { FileDirectoryComponent } from "./file-directory.component";
 
-describe('FileDirectoryComponent', () => {
+describe("FileDirectoryComponent", () => {
   let component: FileDirectoryComponent;
   let fixture: ComponentFixture<FileDirectoryComponent>;
 
@@ -15,7 +15,7 @@ describe('FileDirectoryComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

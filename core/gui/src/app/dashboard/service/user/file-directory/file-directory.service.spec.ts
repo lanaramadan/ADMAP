@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { FileDirectoryService } from './file-directory.service';
+import { FileDirectoryService } from "./file-directory.service";
 
-describe('FileDirectoryService', () => {
+describe("FileDirectoryService", () => {
   let service: FileDirectoryService;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('FileDirectoryService', () => {
     service = TestBed.inject(FileDirectoryService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });
