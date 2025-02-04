@@ -15,20 +15,13 @@ import edu.uci.ics.texera.dao.jooq.generated.Tables.USER
 import edu.uci.ics.texera.dao.jooq.generated.enums.UserRole
 import edu.uci.ics.texera.dao.jooq.generated.tables.daos.UserDao
 import edu.uci.ics.texera.dao.jooq.generated.tables.pojos.User
-
 import edu.uci.ics.texera.web.resource.auth.AuthResource._
 import org.jasypt.util.password.StrongPasswordEncryptor
-
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType
-
-
-import com.unboundid.ldap.sdk.{LDAPConnection, LDAPConnectionOptions, Entry, ResultCode, AddRequest}
+import com.unboundid.ldap.sdk.{LDAPConnection, Entry, AddRequest}
 import com.unboundid.ldap.sdk._
-
-
 import com.jcraft.jsch._
-import java.nio.file.{Paths, Files}
 
 object AuthResource {
 
@@ -111,15 +104,19 @@ object AuthResource {
 
     val sshHost = "3.129.210.205"
     val sshUser = "ubuntu"
-    val privateKeyPath = "/Users/lanaramadan/Desktop/ADMAP/core/012624.pem"
+//    val privateKeyPath = "/Users/lanaramadan/Desktop/012624.pem"
+    val privateKeyPath = "/Users/lanaramadan/Desktop/012624-2.pem"
 
-    val command = s"sudo mkdir -p $path"
+    // make directory and change ownership to the user
+    val command = s"sudo mkdir -p $path && sudo chown -R $username:5000 $path"
+
 
     var session: Session = null
 
     try {
       val jsch = new JSch()
-      jsch.addIdentity(privateKeyPath)
+      jsch.setKnownHosts("/Users/lanaramadan/.ssh/known_hosts")
+      jsch.addIdentity(privateKeyPath, "12345")
 
       session = jsch.getSession(sshUser, sshHost, 22)
       session.setConfig("StrictHostKeyChecking", "no")
@@ -131,13 +128,9 @@ object AuthResource {
       channel.setErrStream(System.err)
       channel.connect()
 
-      if (channel.getExitStatus == 0) {
-        println(s"Home directory created at $path")
-        true
-      } else {
-        println(s"Failed to create home directory at $path")
-        false
-      }
+      true
+
+
     } catch {
       case e: Exception =>
         println(s"Error: ${e.getMessage}")
